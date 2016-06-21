@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import org.apache.http.impl.auth.SPNegoSchemeFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +54,7 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(PelcClientImpl.class);
     private static final String AUTH = "auth/obtain_token";
-    private static final String IMPORT_PACKAGE = "packages/import";
+    private static final String IMPORT_PACKAGE = "packages/import/";
     
     private String serverURL;
     private HttpClient httpclient;
@@ -87,18 +89,22 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
     public void auth() throws Exception {
         String token = execute(AUTH, null);
         if (!StringUtils.isEmpty(token)) {
-            Map<String, Object> map = convertJsonToMap(token);
+           /* Map<String, Object> map = convertJsonToMap(token);
             LOGGER.info("token: {}", map.get("token"));
-            pelcToken.set((String) map.get("token"));
+            pelcToken.set((String) map.get("token"));*/
+            JSONObject json = new JSONObject(token);
+            LOGGER.info("token: {}", json.getString("token"));
+            pelcToken.set(json.getString("token"));
         }
     }
     
-    public void importPackage(String productRelease, String brewTag, String packageName) throws Exception {
-        Map<String,String> params = new HashMap<String,String>();
+    public String importPackage(String productRelease, String brewTag, String packageName) throws Exception {
+        Map<String,Object> params = new HashMap<String,Object>();
         params.put("product_release", productRelease);
         params.put("brew_tag", brewTag);
-        params.put("package_name", packageName);
+        params.put("package_name", Arrays.asList(packageName));
         String result = executePost(IMPORT_PACKAGE, params);
+        return "";
     }
 
     private Map<String, Object> convertJsonToMap(String token) {
@@ -139,7 +145,7 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
         }
     }
 
-    private String executePost(String url, Map<String, String> params)
+    private String executePost(String url, Map<String, Object> params)
             throws Exception {
         StringBuffer urls = new StringBuffer();
         urls.append(serverURL).append(url);
