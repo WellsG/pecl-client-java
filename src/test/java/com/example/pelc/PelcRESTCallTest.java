@@ -1,5 +1,7 @@
 package com.example.pelc;
 
+import java.util.Arrays;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
@@ -36,6 +38,6 @@ public class PelcRESTCallTest {
         String release = "rhel-7-0";
         String brewTag = "rhel-7.0-candidate";
         String packageName = "ipa";
-        client.importPackage(release, brewTag, packageName);
+        client.importPackage(release, brewTag, Arrays.asList(packageName));
     }
 }

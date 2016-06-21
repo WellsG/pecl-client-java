@@ -53,8 +53,6 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(PelcClientImpl.class);
-    private static final String AUTH = "auth/obtain_token";
-    private static final String IMPORT_PACKAGE = "packages/import/";
     
     private String serverURL;
     private HttpClient httpclient;
@@ -87,7 +85,7 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
     }
 
     public void auth() throws Exception {
-        String token = execute(AUTH, null);
+        String token = execute(PelcURIs.AUTH, null);
         if (!StringUtils.isEmpty(token)) {
            /* Map<String, Object> map = convertJsonToMap(token);
             LOGGER.info("token: {}", map.get("token"));
@@ -98,12 +96,12 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
         }
     }
     
-    public String importPackage(String productRelease, String brewTag, String packageName) throws Exception {
+    public String importPackage(String productRelease, String brewTag, List<String> packageNames) throws Exception {
         Map<String,Object> params = new HashMap<String,Object>();
         params.put("product_release", productRelease);
         params.put("brew_tag", brewTag);
-        params.put("package_name", Arrays.asList(packageName));
-        String result = executePost(IMPORT_PACKAGE, params);
+        params.put("package_name", packageNames);
+        String result = executePost(PelcURIs.IMPORT_PACKAGE, params);
         return "";
     }
 
@@ -134,7 +132,7 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
         LOGGER.info("Excute method: {}", urls.toString());
         HttpUriRequest request = new HttpGet(urls.toString());
         request.setHeader("Content-Type", "application/json");
-        if (!url.equals(AUTH)) {
+        if (!url.equals(PelcURIs.AUTH)) {
             request.setHeader("Authorization", "Token " + pelcToken.get());
         }
         try {
@@ -158,7 +156,7 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
         StringEntity entity = new StringEntity(jsonParams);
         entity.setContentType("application/json");
         request.setEntity(entity);
-        if (!url.equals(AUTH)) {
+        if (!url.equals(PelcURIs.AUTH)) {
             request.setHeader("Authorization", "Token " + pelcToken.get());
         }
         try {
