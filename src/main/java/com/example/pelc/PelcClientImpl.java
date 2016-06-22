@@ -68,7 +68,7 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
     }
 
     public PelcClientImpl(String serverURL) {
-        LOGGER.info("Starting PDC client for server url: {}", serverURL);
+        LOGGER.info("Starting PELC client for server url: {}", serverURL);
         this.serverURL = serverURL;
     }
 
@@ -96,13 +96,16 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
         }
     }
     
-    public String importPackage(String productRelease, String brewTag, List<String> packageNames) throws Exception {
+    public Map<String, Task> importPackage(String productRelease, String brewTag, List<String> packageNames) throws Exception {
         Map<String,Object> params = new HashMap<String,Object>();
         params.put("product_release", productRelease);
         params.put("brew_tag", brewTag);
         params.put("package_name", packageNames);
-        String result = executePost(PelcURIs.IMPORT_PACKAGE, params);
-        return "";
+        //String result = executePost(PelcURIs.IMPORT_PACKAGE, params);
+        String result = "{\"iputils\": {\"task_id\":\"537b148c-73a2-4d50-a160-7a40dd02ccbd\"}}";
+        Map<String, Task> response = 
+                new Gson().fromJson(result, new TypeToken<Map<String, Task>>(){}.getType());
+        return response;
     }
 
     private Map<String, Object> convertJsonToMap(String token) {
@@ -113,7 +116,7 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
             LOGGER.error("", e);
         }
         return map;
-    }    
+    }
 
     private String execute(String url, Map<String, String> params)
             throws Exception {

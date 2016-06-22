@@ -1,6 +1,9 @@
 package com.example.pelc;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.util.Arrays;
+import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -37,7 +40,8 @@ public class PelcRESTCallTest {
     public void testImportPackage() throws Exception {
         String release = "rhel-7-0";
         String brewTag = "rhel-7.0-candidate";
-        String packageName = "ipa";
-        client.importPackage(release, brewTag, Arrays.asList(packageName));
+        String packageName = "iputils";
+        Map<String, Task> result = client.importPackage(release, brewTag, Arrays.asList(packageName));
+        assertNotNull(result.get(packageName));
     }
 }
