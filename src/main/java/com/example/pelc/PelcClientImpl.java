@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,8 +100,8 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
         params.put("product_release", productRelease);
         params.put("brew_tag", brewTag);
         params.put("package_name", packageNames);
-        //String result = executePost(PelcURIs.IMPORT_PACKAGE, params);
-        String result = "{\"iputils\": {\"task_id\":\"537b148c-73a2-4d50-a160-7a40dd02ccbd\"}}";
+        String result = executePost(PelcURIs.IMPORT_PACKAGE, params);
+        LOGGER.info("Import package response: {}", result);
         Map<String, Task> response = 
                 new Gson().fromJson(result, new TypeToken<Map<String, Task>>(){}.getType());
         return response;
