@@ -47,12 +47,10 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-
 public class PelcClientImpl implements PelcClient, InvocationHandler {
 
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(PelcClientImpl.class);
-    
+    private static final Logger LOGGER = LoggerFactory.getLogger(PelcClientImpl.class);
+
     private String serverURL;
     private HttpClient httpclient;
     private static final ThreadLocal<String> pelcToken = new ThreadLocal<String>();
@@ -60,10 +58,9 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
     private Semaphore loginSemaphore = new Semaphore(1);
 
     public static PelcClient create(String url) {
-        final PelcClientImpl impl =
-            new PelcClientImpl(url);
-        return (PelcClient) Proxy.newProxyInstance(PelcClientImpl.class
-            .getClassLoader(), new Class[] { PelcClient.class }, impl);
+        final PelcClientImpl impl = new PelcClientImpl(url);
+        return (PelcClient) Proxy.newProxyInstance(PelcClientImpl.class.getClassLoader(), new Class[] { PelcClient.class },
+                impl);
     }
 
     public PelcClientImpl(String serverURL) {
@@ -75,9 +72,8 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
         if (httpclient == null) {
             System.setProperty("sun.security.krb5.debug", "true");
             System.setProperty("jsse.enableSNIExtension", "false");
-            System.setProperty("javax.security.auth.useSubjectCredsOnly",
-                    "false");
-            //Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+            System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
+            // Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             httpclient = wrapClient(new DefaultHttpClient());
         }
         return httpclient;
@@ -86,47 +82,47 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
     public void auth() throws Exception {
         String token = execute(PelcURIs.AUTH, null);
         if (!StringUtils.isEmpty(token)) {
-           /* Map<String, Object> map = convertJsonToMap(token);
-            LOGGER.info("token: {}", map.get("token"));
-            pelcToken.set((String) map.get("token"));*/
+            /*
+             * Map<String, Object> map = convertJsonToMap(token); LOGGER.info("token: {}", map.get("token"));
+             * pelcToken.set((String) map.get("token"));
+             */
             JSONObject json = new JSONObject(token);
             LOGGER.info("token: {}", json.getString("token"));
             pelcToken.set(json.getString("token"));
         }
     }
-    
+
     public Map<String, Task> importPackage(String productRelease, String brewTag, List<String> packageNames) throws Exception {
-        Map<String,Object> params = new HashMap<String,Object>();
+        Map<String, Object> params = new HashMap<String, Object>();
         params.put("product_release", productRelease);
         params.put("brew_tag", brewTag);
         params.put("package_name", packageNames);
         String result = executePost(PelcURIs.IMPORT_PACKAGE, params);
         LOGGER.info("Import package response: {}", result);
-        Map<String, Task> response = 
-                new Gson().fromJson(result, new TypeToken<Map<String, Task>>(){}.getType());
+        Map<String, Task> response = new Gson().fromJson(result, new TypeToken<Map<String, Task>>() {
+        }.getType());
         return response;
     }
 
     private Map<String, Object> convertJsonToMap(String token) {
         Map<String, Object> map = null;
         try {
-            map = new Gson().fromJson(token, new TypeToken<Map<String, Object>>(){}.getType());
+            map = new Gson().fromJson(token, new TypeToken<Map<String, Object>>() {
+            }.getType());
         } catch (Exception e) {
             LOGGER.error("", e);
         }
         return map;
     }
 
-    private String execute(String url, Map<String, String> params)
-            throws Exception {
+    private String execute(String url, Map<String, String> params) throws Exception {
         StringBuffer urls = new StringBuffer();
         urls.append(serverURL).append(url);
         if (params != null) {
             final List<NameValuePair> qparams = new ArrayList<NameValuePair>();
             if (params != null) {
                 for (Map.Entry<String, String> param : params.entrySet()) {
-                    qparams.add(new BasicNameValuePair(param.getKey(), param
-                            .getValue()));
+                    qparams.add(new BasicNameValuePair(param.getKey(), param.getValue()));
                 }
             }
             urls.append("?").append(URLEncodedUtils.format(qparams, "utf-8"));
@@ -145,8 +141,7 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
         }
     }
 
-    private String executePost(String url, Map<String, Object> params)
-            throws Exception {
+    private String executePost(String url, Map<String, Object> params) throws Exception {
         StringBuffer urls = new StringBuffer();
         urls.append(serverURL).append(url);
         String jsonParams = new Gson().toJson(params);
@@ -171,26 +166,26 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
 
     private String parseResponse(HttpResponse response) throws Exception {
         StringBuffer sb = new StringBuffer();
-        if (response.getStatusLine().getStatusCode() >= 200
-                && response.getStatusLine().getStatusCode() <= 300) {
-            BufferedReader rd = new BufferedReader(new InputStreamReader(
-                    response.getEntity().getContent()));
-            String line = "";
-            while ((line = rd.readLine()) != null) {
-                sb.append(line);
-            }
-        } else {
-            throw new Exception("http response code error: "
-                    + response.getStatusLine().getStatusCode() + "  "
-                    + response.getStatusLine().getReasonPhrase());
+        BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        String line = "";
+        while ((line = rd.readLine()) != null) {
+            sb.append(line);
         }
-        return sb.toString();
+        if (response.getStatusLine().getStatusCode() >= 200 
+                && response.getStatusLine().getStatusCode() <= 300) {
+            return sb.toString();
+        } else {
+            throw new Exception("http response code error: " 
+                    + response.getStatusLine().getStatusCode() + "  "
+                    + response.getStatusLine().getReasonPhrase() + ";" 
+                    + "details:"
+                    + sb.toString());
+        }
     }
 
-    public Object invoke(Object proxy, Method method, Object[] args)
-        throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-        // This function implements login on demand for PDC;
+        // This function implements login on demand for PELC;
         // The given method is invoked. If a UNAUTHORIZED error is raised,
         // then log in and try again.
 
@@ -212,9 +207,7 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
                 }
             } else {
                 // If we get here, some other thread is attempting to log in.
-                LOGGER
-                    .info("Waiting for other thread to log in for call to {}",
-                          method.getName());
+                LOGGER.info("Waiting for other thread to log in for call to {}", method.getName());
                 loginSemaphore.acquireUninterruptibly();
                 loginSemaphore.release();
             }
@@ -227,8 +220,7 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
         }
     }
 
-    public static org.apache.http.client.HttpClient wrapClient(
-            org.apache.http.client.HttpClient base) {
+    public static org.apache.http.client.HttpClient wrapClient(org.apache.http.client.HttpClient base) {
         try {
             SSLContext ctx = SSLContext.getInstance("TLS");
             X509TrustManager tm = new X509TrustManager() {
@@ -236,15 +228,11 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
                     return null;
                 }
 
-                public void checkClientTrusted(
-                        java.security.cert.X509Certificate[] chain,
-                        String authType)
+                public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType)
                         throws java.security.cert.CertificateException {
                 }
 
-                public void checkServerTrusted(
-                        java.security.cert.X509Certificate[] chain,
-                        String authType)
+                public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType)
                         throws java.security.cert.CertificateException {
                 }
             };
@@ -254,12 +242,10 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
             SchemeRegistry registry = new SchemeRegistry();
             registry.register(new Scheme("https", 443, ssf));
             registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-            ClientConnectionManager mgr = new PoolingClientConnectionManager(
-                    registry);
+            ClientConnectionManager mgr = new PoolingClientConnectionManager(registry);
 
             SPNegoSchemeFactory nsf = new SPNegoSchemeFactory();
-            DefaultHttpClient httpclient = new DefaultHttpClient(mgr,
-                    base.getParams());
+            DefaultHttpClient httpclient = new DefaultHttpClient(mgr, base.getParams());
             httpclient.getAuthSchemes().register(AuthPolicy.SPNEGO, nsf);
             Credentials credential = new Credentials() {
                 public String getPassword() {
