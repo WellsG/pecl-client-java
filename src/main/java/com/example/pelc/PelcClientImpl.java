@@ -104,6 +104,26 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
         return response;
     }
 
+    public Release getProductRelease(String release) throws Exception {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("short_name", release);
+        String result = execute(PelcURIs.PRODUCT_RELEASE, params);
+        PagedList<Release> pagedList = null;
+        if (!StringUtils.isEmpty(result)) {
+            try {
+                pagedList = new Gson().fromJson(result, new TypeToken<PagedList<Release>>() {
+                }.getType());
+            } catch (Exception e) {
+                LOGGER.error("", e);
+            }
+        }
+        if (pagedList != null && pagedList.getResults().size() > 0) {
+            return pagedList.getResults().get(0);
+        } else {
+            return null;
+        }
+    }
+
     private Map<String, Object> convertJsonToMap(String token) {
         Map<String, Object> map = null;
         try {

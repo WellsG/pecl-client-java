@@ -44,4 +44,11 @@ public class PelcRESTCallTest {
         Map<String, Task> result = client.importPackage(release, brewTag, Arrays.asList(packageName));
         assertNotNull(result.get(packageName));
     }
+
+    @Test
+    public void testGetProductRelease() throws Exception {
+        String release = "rhel-7-0";
+        Release releaseResp = client.getProductRelease(release);
+        assertNotNull(releaseResp);
+    }
 }

@@ -6,6 +6,8 @@ import java.util.Map;
 public interface PelcClient {
 
     public void auth() throws Exception;
-
+    
     public Map<String, Task> importPackage(String productRelease, String brewTag, List<String> packageNames) throws Exception;
+
+    public Release getProductRelease(String release) throws Exception;
 }
