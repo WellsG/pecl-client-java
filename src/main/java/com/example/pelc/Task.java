@@ -3,16 +3,36 @@ package com.example.pelc;
 import com.google.gson.annotations.SerializedName;
 
 public class Task {
-    
-    @SerializedName("task_id")
-    private String taskId;
 
-    public String getTaskId() {
-        return taskId;
+    private String id;
+    @SerializedName("package_name")
+    private String packageName;
+    @SerializedName("package_nvr")
+    private String packageNVR;
+    private String status;
+
+    public String getId() {
+        return id;
     }
-
-    public void setTaskId(String taskId) {
-        this.taskId = taskId;
+    public void setId(String id) {
+        this.id = id;
     }
-
+    public String getPackageName() {
+        return packageName;
+    }
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    public String getPackageNVR() {
+        return packageNVR;
+    }
+    public void setPackageNVR(String packageNVR) {
+        this.packageNVR = packageNVR;
+    }
 }

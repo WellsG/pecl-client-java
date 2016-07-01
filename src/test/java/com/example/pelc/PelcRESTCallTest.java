@@ -41,7 +41,7 @@ public class PelcRESTCallTest {
         String release = "rhel-7-0";
         String brewTag = "rhel-7.0-candidate";
         String packageName = "iputils";
-        Map<String, Task> result = client.importPackage(release, brewTag, Arrays.asList(packageName));
+        Map<String, ImportTaskResponse> result = client.importPackage(release, brewTag, Arrays.asList(packageName));
         assertNotNull(result.get(packageName));
     }
 
@@ -50,5 +50,12 @@ public class PelcRESTCallTest {
         String release = "rhel-7-0";
         Release releaseResp = client.getProductRelease(release);
         assertNotNull(releaseResp);
+    }
+
+    @Test
+    public void testGetTask() throws Exception {
+        String taskId = "311";
+        Task task = client.getTask(taskId);
+        assertNotNull(task);
     }
 }

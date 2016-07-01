@@ -92,14 +92,14 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
         }
     }
 
-    public Map<String, Task> importPackage(String productRelease, String brewTag, List<String> packageNames) throws Exception {
+    public Map<String, ImportTaskResponse> importPackage(String productRelease, String brewTag, List<String> packageNames) throws Exception {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("product_release", productRelease);
         params.put("brew_tag", brewTag);
         params.put("package_name", packageNames);
         String result = executePost(PelcURIs.IMPORT_PACKAGE, params);
         LOGGER.info("Import package response: {}", result);
-        Map<String, Task> response = new Gson().fromJson(result, new TypeToken<Map<String, Task>>() {
+        Map<String, ImportTaskResponse> response = new Gson().fromJson(result, new TypeToken<Map<String, ImportTaskResponse>>() {
         }.getType());
         return response;
     }
@@ -123,6 +123,13 @@ public class PelcClientImpl implements PelcClient, InvocationHandler {
             return null;
         }
     }
+
+    public Task getTask(String taskId) throws Exception {
+        String result = execute(PelcURIs.GET_TASK + taskId, null);
+        Task task = new Gson().fromJson(result, Task.class);
+        return task;
+    }
+
 
     private Map<String, Object> convertJsonToMap(String token) {
         Map<String, Object> map = null;
